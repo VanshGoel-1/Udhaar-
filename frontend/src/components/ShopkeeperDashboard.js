@@ -60,15 +60,17 @@ function ShopkeeperDashboard({ user, onLogout }) {
     const fetchData = useCallback(async () => {
         setIsLoading(true);
         try {
-            const [ordersRes, productsRes, customersRes] = await Promise.all([
+            const [ordersRes, productsRes] = await Promise.all([
                 fetch(`/api/shop/${user.shop_id}/orders`),
-                fetch(`/api/products?shop_id=${user.shop_id}`),
-                fetch(`/api/udhaar/summary?shop_id=${user.shop_id}`)
+                fetch(`/api/products?shop_id=${user.shop_id}`)
             ]);
+            
+            const customersRes = await fetch(`/api/udhaar/summary?shop_id=${user.shop_id}`);
+            
             setData({
                 orders: await ordersRes.json(),
                 products: await productsRes.json(),
-                customers: await customersRes.json()
+                customers: customersRes.ok ? await customersRes.json() : []
             });
         } catch (error) { console.error("Failed to fetch shop data:", error); } 
         finally { setIsLoading(false); }
@@ -76,6 +78,26 @@ function ShopkeeperDashboard({ user, onLogout }) {
 
     useEffect(() => {
         fetchData();
+        
+        // Set up socket event listeners for real-time updates
+        if (user.socket) {
+            user.socket.on('new_order', (orderData) => {
+                // Refresh orders when a new order comes in
+                fetchData();
+            });
+            
+            user.socket.on('order_update', (updateData) => {
+                // Refresh orders when status changes
+                fetchData();
+            });
+        }
+        
+        return () => {
+            if (user.socket) {
+                user.socket.off('new_order');
+                user.socket.off('order_update');
+            }
+        };
     }, [fetchData]);
 
     const handleUpdateOrderStatus = async (orderId, status) => {

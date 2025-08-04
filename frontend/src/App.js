@@ -6,10 +6,11 @@ import io from 'socket.io-client';
 import LoginPage from './components/LoginPage';
 import RegisterPage from './components/RegisterPage';
 import ShopkeeperDashboard from './components/ShopkeeperDashboard';
-// import HomePage from './components/HomePage';
-// import OrdersPage from './components/OrdersPage';
-// import HistoryPage from './components/HistoryPage';
-// import ProfilePage from './components/ProfilePage';
+import CustomerDashboard from './components/CustomerDashboard';
+import HomePage from './components/HomePage';
+import OrdersPage from './components/OrdersPage';
+import HistoryPage from './components/HistoryPage';
+import ProfilePage from './components/ProfilePage';
 
 
 // Icon component for the bottom navigation
@@ -69,15 +70,15 @@ function App() {
     const renderCustomerPage = () => {
         switch(activeTab) {
             case 'home':
-                return <div className="text-center p-8">HomePage Component will go here.</div>;
+                return <HomePage user={user} />;
             case 'orders':
-                return <div className="text-center p-8">OrdersPage Component will go here.</div>;
+                return <OrdersPage user={user} />;
             case 'history':
-                return <div className="text-center p-8">HistoryPage Component will go here.</div>;
+                return <HistoryPage user={user} />;
             case 'profile':
-                return <div className="text-center p-8">ProfilePage Component will go here.</div>;
+                return <ProfilePage user={user} onLogout={handleLogout} />;
             default:
-                 return <div className="text-center p-8">HomePage Component will go here.</div>;
+                return <HomePage user={user} />;
         }
     }
 
@@ -94,7 +95,7 @@ function App() {
         }
         
         return (
-            <div>
+            <div className="pb-20">
                 {renderCustomerPage()}
                 <div className="fixed bottom-0 left-0 right-0 bg-white shadow-t-md border-t">
                     <div className="flex justify-around">

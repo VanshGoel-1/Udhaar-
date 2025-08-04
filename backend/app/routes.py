@@ -5,6 +5,7 @@ from . import socketio # Import socketio instance
 from .models import db, User, Shop, Product, Order, Transaction
 import json
 from sqlalchemy import func
+from flask_socketio import join_room
 
 api = Blueprint('api', __name__)
 
@@ -72,9 +73,28 @@ def get_shops():
 @api.route('/products', methods=['GET'])
 def get_products():
     shop_id = request.args.get('shop_id')
+    if not shop_id:
+        return jsonify({'status': 'error', 'message': 'shop_id is required'}), 400
     products = Product.query.filter_by(shop_id=shop_id).order_by(Product.name).all()
     return jsonify([{'id': p.id, 'name': p.name, 'price': p.price, 'category': p.category} for p in products])
 
+@api.route('/products', methods=['POST'])
+def add_product():
+    data = request.get_json()
+    new_product = Product(
+        name=data['name'],
+        price=float(data['price']),
+        category=data.get('category', 'General'),
+        shop_id=data['shop_id']
+    )
+    db.session.add(new_product)
+    db.session.commit()
+    return jsonify({
+        'id': new_product.id,
+        'name': new_product.name,
+        'price': new_product.price,
+        'category': new_product.category
+    }), 201
 @api.route('/orders', methods=['POST'])
 def place_order():
     data = request.get_json()
@@ -136,7 +156,17 @@ def update_order_status(order_id):
 @api.route('/customer/<int:user_id>/data', methods=['GET'])
 def get_customer_data(user_id):
     # Current Bill
-    balance_result = db.session.query(func.sum(Transaction.amount)).filter(Transaction.customer_id == user_id).scalar()
+    purchase_total = db.session.query(func.sum(Transaction.amount)).filter(
+        Transaction.customer_id == user_id,
+        Transaction.type == 'purchase'
+    ).scalar() or 0
+    
+    payment_total = db.session.query(func.sum(Transaction.amount)).filter(
+        Transaction.customer_id == user_id,
+        Transaction.type == 'payment'
+    ).scalar() or 0
+    
+    balance_result = purchase_total - payment_total
     
     # Active Orders
     active_orders_query = Order.query.filter(
@@ -153,6 +183,36 @@ def get_customer_data(user_id):
         'history': [{'id': t.id, 'shop_name': t.shop.shop_name, 'description': t.description, 'amount': t.amount, 'type': t.type, 'timestamp': t.timestamp.isoformat()} for t in transactions_query]
     })
 
+@api.route('/udhaar/summary', methods=['GET'])
+def get_udhaar_summary():
+    shop_id = request.args.get('shop_id')
+    if not shop_id:
+        return jsonify([])
+    
+    # Get customer balances for this shop
+    customers = db.session.query(
+        User.id.label('customer_id'),
+        User.name.label('customer_name'),
+        func.coalesce(func.sum(
+            func.case(
+                (Transaction.type == 'purchase', Transaction.amount),
+                else_=0
+            ) - func.case(
+                (Transaction.type == 'payment', Transaction.amount),
+                else_=0
+            )
+        ), 0).label('balance')
+    ).outerjoin(
+        Transaction, User.id == Transaction.customer_id
+    ).filter(
+        Transaction.shop_id == shop_id
+    ).group_by(User.id, User.name).all()
+    
+    return jsonify([{
+        'customer_id': c.customer_id,
+        'customer_name': c.customer_name,
+        'balance': float(c.balance)
+    } for c in customers])
 # --- Socket.IO Event Handlers for Real-Time ---
 @socketio.on('connect')
 def handle_connect():
@@ -162,7 +222,6 @@ def handle_connect():
 def handle_join_shop_room(data):
     shop_id = data.get('shop_id')
     if shop_id:
-        from flask_socketio import join_room
         join_room(f'shop_{shop_id}')
         print(f"Client {request.sid} joined room for shop {shop_id}")
 
