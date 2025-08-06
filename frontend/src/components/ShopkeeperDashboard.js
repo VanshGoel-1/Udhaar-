@@ -17,7 +17,7 @@ const ProductManager = ({ user, products, setProducts }) => {
         e.preventDefault();
         setIsLoading(true);
         try {
-            const response = await fetch('/api/products', {
+            const response = await fetch('http://localhost:5000/api/products', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ name: newProductName, price: newProductPrice, category: newProductCategory, shop_id: user.shop_id })
@@ -61,11 +61,11 @@ function ShopkeeperDashboard({ user, onLogout }) {
         setIsLoading(true);
         try {
             const [ordersRes, productsRes] = await Promise.all([
-                fetch(`/api/shop/${user.shop_id}/orders`),
-                fetch(`/api/products?shop_id=${user.shop_id}`)
+                fetch(`http://localhost:5000/api/shop/${user.shop_id}/orders`),
+                fetch(`http://localhost:5000/api/products?shop_id=${user.shop_id}`)
             ]);
             
-            const customersRes = await fetch(`/api/udhaar/summary?shop_id=${user.shop_id}`);
+            const customersRes = await fetch(`http://localhost:5000/api/udhaar/summary?shop_id=${user.shop_id}`);
             
             setData({
                 orders: await ordersRes.json(),
@@ -101,7 +101,7 @@ function ShopkeeperDashboard({ user, onLogout }) {
     }, [fetchData]);
 
     const handleUpdateOrderStatus = async (orderId, status) => {
-        await fetch(`/api/order/${orderId}/status`, {
+        await fetch(`http://localhost:5000/api/order/${orderId}/status`, {
             method: 'PUT',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ status })

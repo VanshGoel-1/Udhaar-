@@ -1,6 +1,6 @@
 // src/App.js
 import React, { useState, useEffect } from 'react';
-import io from 'socket.io-client';
+import { io } from 'socket.io-client';
 
 // Import all our components from the 'components' folder
 import LoginPage from './components/LoginPage';
@@ -38,7 +38,7 @@ function App() {
             setUser(parsedUser);
             setPage('dashboard');
             
-            const newSocket = io('/'); 
+            const newSocket = io('http://localhost:5000'); 
             setSocket(newSocket);
 
             if(parsedUser.role === 'shopkeeper') {

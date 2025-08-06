@@ -26,7 +26,7 @@ function ProfilePage({ user, onLogout }) {
         setMessage('');
         
         try {
-            const response = await fetch(`/api/user/${user.id}/profile`, {
+            const response = await fetch(`http://localhost:5000/api/user/${user.id}/profile`, {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(formData)

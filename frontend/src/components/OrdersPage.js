@@ -13,7 +13,7 @@ function OrdersPage({ user }) {
         const fetchShops = async () => {
             setIsLoading(true);
             try {
-                const response = await fetch('/api/shops');
+                const response = await fetch('http://localhost:5000/api/shops');
                 const data = await response.json();
                 if (response.ok) setShops(data);
             } catch (error) { 
@@ -42,7 +42,7 @@ function OrdersPage({ user }) {
         setIsLoading(true);
         setSelectedShop(shop);
         try {
-            const response = await fetch(`/api/products?shop_id=${shop.id}`);
+            const response = await fetch(`http://localhost:5000/api/products?shop_id=${shop.id}`);
             const data = await response.json();
             if (response.ok) {
                 setProducts(data);
@@ -77,7 +77,7 @@ function OrdersPage({ user }) {
         if (cart.length === 0) return alert('Your cart is empty.');
         setIsLoading(true);
         try {
-            const response = await fetch('/api/orders', {
+            const response = await fetch('http://localhost:5000/api/orders', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ customer_id: user.id, shop_id: selectedShop.id, items: cart })

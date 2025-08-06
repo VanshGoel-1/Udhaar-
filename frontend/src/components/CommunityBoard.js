@@ -10,7 +10,7 @@ function CommunityBoard({ user }) {
         const fetchPosts = async () => {
             setIsLoading(true);
             try {
-                const response = await fetch('/api/broadcasts');
+                const response = await fetch('http://localhost:5000/api/broadcasts');
                 const data = await response.json();
                 setPosts(data);
             } catch (error) {
@@ -27,7 +27,7 @@ function CommunityBoard({ user }) {
         if (!newMessage.trim()) return;
 
         try {
-            const response = await fetch('/api/broadcasts', {
+            const response = await fetch('http://localhost:5000/api/broadcasts', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ user_id: user.id, message: newMessage })

@@ -13,7 +13,7 @@ function HistoryPage({ user }) {
         const fetchCustomerData = async () => {
             setIsLoading(true);
             try {
-                const response = await fetch(`/api/customer/${user.id}/data`);
+                const response = await fetch(`http://localhost:5000/api/customer/${user.id}/data`);
                 if (response.ok) {
                     const data = await response.json();
                     setCustomerData(data);

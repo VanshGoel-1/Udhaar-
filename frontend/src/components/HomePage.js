@@ -15,8 +15,8 @@ function HomePage({ user }) {
             setIsLoading(true);
             try {
                 const [customerRes, shopsRes] = await Promise.all([
-                    fetch(`/api/customer/${user.id}/data`),
-                    fetch('/api/shops')
+                    fetch(`http://localhost:5000/api/customer/${user.id}/data`),
+                    fetch('http://localhost:5000/api/shops')
                 ]);
                 
                 if (customerRes.ok) {
