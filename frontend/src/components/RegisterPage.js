@@ -42,6 +42,7 @@ function RegisterPage({ setPage }) {
         <div className="max-w-md mx-auto">
             <h2 className="text-3xl font-bold mb-6 text-center text-gray-800">Create Your Account</h2>
             {error && <p className="bg-red-100 text-red-700 p-3 rounded-lg mb-4">{error}</p>}
+            }
             <form onSubmit={handleSubmit}>
                 <div className="mb-4">
                     <label className="block text-gray-700 mb-2">I am a...</label>
