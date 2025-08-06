@@ -50,7 +50,7 @@ function App() {
         return () => {
             if(socket) socket.disconnect();
         }
-    }, []);
+    }, [socket]);
 
     const handleLoginSuccess = (userData) => {
         sessionStorage.setItem('udhaarUser', JSON.stringify(userData));

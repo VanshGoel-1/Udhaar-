@@ -98,7 +98,7 @@ function ShopkeeperDashboard({ user, onLogout }) {
                 user.socket.off('order_update');
             }
         };
-    }, [fetchData]);
+    }, [fetchData, user.socket]);
 
     const handleUpdateOrderStatus = async (orderId, status) => {
         await fetch(`http://localhost:5000/api/order/${orderId}/status`, {
